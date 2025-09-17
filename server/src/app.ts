@@ -4,7 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import moment from "moment-timezone";
-
+import indexRoutes from "./routes";
 dotenv.config();
 
 
@@ -30,6 +30,10 @@ morgan.token("date", () => {
 app.use(
   morgan("[:date] :method :url :status :res[content-length] - :response-time ms")
 );
+
+
+app.use("/api", indexRoutes);
+
 
 
 
