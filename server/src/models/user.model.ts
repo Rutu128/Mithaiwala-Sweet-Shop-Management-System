@@ -1,5 +1,16 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
+
+interface IUser extends Document {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    role: string;
+    createdAt: Date;
+    updatedAt: Date;
+    comparePassword(password: string): Promise<boolean>;
+}
 
 
 const userSchema = new Schema({
@@ -23,6 +34,7 @@ const userSchema = new Schema({
     role: {
         type: String,
         required: true,
+        default: "user",
         enum: ["admin", "user"]
     },
     createdAt: {
@@ -45,6 +57,6 @@ userSchema.methods.comparePassword = async function(password: string): Promise<b
     return await bcrypt.compare(password, this.password);
 };
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;
