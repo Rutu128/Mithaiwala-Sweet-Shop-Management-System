@@ -171,7 +171,7 @@ describe("Sweet API", () => {
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
                 .send(testSweet);
-            sweetId = response.body.sweet.id;
+            sweetId = response.body.sweet._id;
         });
 
         it("should update a sweet when admin is authenticated", async () => {
@@ -247,7 +247,7 @@ describe("Sweet API", () => {
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
                 .send(testSweet);
-            sweetId = response.body.sweet.id;
+            sweetId = response.body.sweet._id;
         });
 
         it("should delete a sweet when admin is authenticated", async () => {
@@ -348,7 +348,7 @@ describe("Sweet API", () => {
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
                 .send(testSweet);
-            sweetId = response.body.sweet.id;
+            sweetId = response.body.sweet._id;
         });
 
         it("should get a sweet by id when user is authenticated", async () => {
@@ -358,7 +358,7 @@ describe("Sweet API", () => {
                 .expect(200);
             
             expect(response.body.message).toBe("Sweet retrieved successfully");
-            expect(response.body.sweet.id).toBe(sweetId);
+            expect(response.body.sweet._id).toBe(sweetId);
             expect(response.body.sweet.name).toBe(testSweet.name);
             expect(response.body.sweet.price).toBe(testSweet.price);
         });

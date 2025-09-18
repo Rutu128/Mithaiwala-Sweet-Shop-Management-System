@@ -16,7 +16,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await User.deleteMany({});
+    await User.deleteMany({
+        email: testUser.email
+    });
     await mongoose.connection.close();
 });
 
