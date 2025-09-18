@@ -11,5 +11,9 @@ router.get("/:id", isAuthenticated, sweetsController.getSweetById);
 router.put("/:id", isAuthenticated, isAdmin, sweetsController.updateSweet);
 router.delete("/:id", isAuthenticated, isAdmin, sweetsController.deleteSweet);
 
+// Inventory routes
+router.post("/:id/purchase", isAuthenticated, sweetsController.purchaseSweet);
+router.post("/:id/restock", isAuthenticated, isAdmin, sweetsController.restockSweet);
+
 
 export default router;

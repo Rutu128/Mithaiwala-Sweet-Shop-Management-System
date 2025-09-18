@@ -89,7 +89,7 @@ afterAll(async () => {
 
 afterEach(async () => {
     await Sweet.deleteMany({
-        name: { $in: [testSweet.name] }
+        name: { $in: [testSweet.name, "Another Sweet"] }
     });
 });
 
@@ -317,6 +317,8 @@ describe("Sweet API", () => {
             expect(response.body.sweets).toHaveLength(2);
             expect(response.body.sweets[0].name).toBe(testSweet.name);
             expect(response.body.sweets[1].name).toBe("Another Sweet");
+
+            
         });
 
         it("should return 401 when user is not authenticated", async () => {
