@@ -406,4 +406,175 @@ describe("Sweet API", () => {
                 });
         });
     });
+
+    describe("GET /api/sweets/search", () => {
+        beforeEach(async () => {
+            // Clear existing sweets first
+            await Sweet.deleteMany({});
+            
+            // Create test sweets for search
+            await request(app)
+                .post("/api/sweets")
+                .set('Cookie', `token=${adminToken}`)
+                .send({
+                    name: "Chocolate Bar",
+                    price: 50,
+                    description: "Delicious chocolate bar",
+                    image: "chocolate.jpg",
+                    category: "chocolate",
+                    quantity: 100
+                })
+                .expect(201);
+
+            await request(app)
+                .post("/api/sweets")
+                .set('Cookie', `token=${adminToken}`)
+                .send({
+                    name: "Caramel Toffee",
+                    price: 75,
+                    description: "Sweet caramel toffee",
+                    image: "toffee.jpg",
+                    category: "caramel",
+                    quantity: 80
+                })
+                .expect(201);
+
+            await request(app)
+                .post("/api/sweets")
+                .set('Cookie', `token=${adminToken}`)
+                .send({
+                    name: "Premium Chocolate",
+                    price: 150,
+                    description: "Premium quality chocolate",
+                    image: "premium.jpg",
+                    category: "chocolate",
+                    quantity: 50
+                })
+                .expect(201);
+        });
+
+        afterEach(async () => {
+            await Sweet.deleteMany({});
+        });
+
+        it("should search sweets by name when user is authenticated", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ name: "chocolate" })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(2);
+            expect(response.body.sweets).toHaveLength(2);
+            expect(response.body.searchCriteria.name).toBe("chocolate");
+            
+            const sweetNames = response.body.sweets.map((sweet: any) => sweet.name);
+            expect(sweetNames).toContain("Chocolate Bar");
+            expect(sweetNames).toContain("Premium Chocolate");
+        });
+
+        it("should search sweets by category when user is authenticated", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ category: "caramel" })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(1);
+            expect(response.body.sweets).toHaveLength(1);
+            expect(response.body.searchCriteria.category).toBe("caramel");
+            expect(response.body.sweets[0].name).toBe("Caramel Toffee");
+        });
+
+        it("should search sweets by price range when user is authenticated", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ minPrice: 60, maxPrice: 100 })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(1);
+            expect(response.body.sweets).toHaveLength(1);
+            expect(response.body.searchCriteria.minPrice).toBe(60);
+            expect(response.body.searchCriteria.maxPrice).toBe(100);
+            expect(response.body.sweets[0].name).toBe("Caramel Toffee");
+        });
+
+        it("should search sweets with multiple criteria when user is authenticated", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ 
+                    name: "chocolate", 
+                    category: "chocolate", 
+                    maxPrice: 100 
+                })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(1);
+            expect(response.body.sweets).toHaveLength(1);
+            expect(response.body.sweets[0].name).toBe("Chocolate Bar");
+        });
+
+        it("should return empty results when no sweets match criteria", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ name: "nonexistent" })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(0);
+            expect(response.body.sweets).toHaveLength(0);
+        });
+
+        it("should return all sweets when no search criteria provided", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(3);
+            expect(response.body.sweets).toHaveLength(3);
+        });
+
+        it("should return 401 when user is not authenticated", async () => {
+            await request(app)
+                .get("/api/sweets/search")
+                .query({ name: "chocolate" })
+                .expect(401)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Unauthorized");
+                });
+        });
+
+        it("should handle case-insensitive name search", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ name: "CHOCOLATE" })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(2);
+            expect(response.body.sweets).toHaveLength(2);
+        });
+
+        it("should handle partial name search", async () => {
+            const response = await request(app)
+                .get("/api/sweets/search")
+                .set('Cookie', `token=${userToken}`)
+                .query({ name: "choco" })
+                .expect(200);
+
+            expect(response.body.message).toBe("Search completed successfully");
+            expect(response.body.totalResults).toBe(2);
+            expect(response.body.sweets).toHaveLength(2);
+        });
+    });
 });
