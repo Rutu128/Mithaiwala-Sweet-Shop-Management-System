@@ -11,15 +11,31 @@ declare global {
 }
 
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.token;
+    // Check for token in cookies first, then in Authorization header
+    let token = req.cookies.token;
+    
+    if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        }
+    }
+    
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    
     let decoded: any;
-    decoded = jwt.verify(token, process.env.JWT_SECRET || "");
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET || "");
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid token" });
+    }
+    
     if (!decoded) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    
     const user = await User.findById(decoded.id);
 
     if (!user) {
