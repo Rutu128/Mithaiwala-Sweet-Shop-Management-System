@@ -7,6 +7,7 @@ const   router = Router();
 
 router.post("/", isAuthenticated, isAdmin, sweetsController.createSweet);
 router.get("/", isAuthenticated, sweetsController.getAllSweets);
+router.get("/search", isAuthenticated, sweetsController.searchSweets);
 router.get("/:id", isAuthenticated, sweetsController.getSweetById);
 router.put("/:id", isAuthenticated, isAdmin, sweetsController.updateSweet);
 router.delete("/:id", isAuthenticated, isAdmin, sweetsController.deleteSweet);

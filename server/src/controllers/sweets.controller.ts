@@ -192,3 +192,50 @@ export const restockSweet = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+export const searchSweets = async (req: Request, res: Response) => {
+    try {
+        const { name, category, minPrice, maxPrice } = req.query;
+
+        // Build search query
+        const searchQuery: any = {};
+
+        // Search by name (case-insensitive partial match)
+        if (name) {
+            searchQuery.name = { $regex: name as string, $options: 'i' };
+        }
+
+        // Search by category
+        if (category) {
+            searchQuery.category = category;
+        }
+
+        // Search by price range
+        if (minPrice || maxPrice) {
+            searchQuery.price = {};
+            if (minPrice) {
+                searchQuery.price.$gte = parseFloat(minPrice as string);
+            }
+            if (maxPrice) {
+                searchQuery.price.$lte = parseFloat(maxPrice as string);
+            }
+        }
+
+        // Execute search
+        const sweets = await Sweet.find(searchQuery);
+
+        res.status(200).json({
+            message: "Search completed successfully",
+            sweets,
+            totalResults: sweets.length,
+            searchCriteria: {
+                name: name || null,
+                category: category || null,
+                minPrice: minPrice ? parseFloat(minPrice as string) : null,
+                maxPrice: maxPrice ? parseFloat(maxPrice as string) : null
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
