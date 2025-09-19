@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "prestart": "npm run build",
-    "test": "jest --watchAll"
+    "test": "npx jest --runInBand --testTimeout=30000"
   },
   "keywords": [],
   "author": "",

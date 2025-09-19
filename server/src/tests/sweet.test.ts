@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../app";
-import { connectDB } from "../db";
+import { testConnectDB as connectDB } from "../db";
 import mongoose from "mongoose";
 import User from "../models/user.model";
 import Sweet from "../models/sweet.model";
@@ -54,7 +54,11 @@ beforeAll(async () => {
             password: testAdmin.password
         });
     
-    adminToken = adminLoginResponse.headers['set-cookie'][0].split(';')[0].split('=')[1];
+    if (adminLoginResponse.headers['set-cookie'] && adminLoginResponse.headers['set-cookie'][0]) {
+        adminToken = adminLoginResponse.headers['set-cookie'][0].split(';')[0].split('=')[1];
+    } else {
+        throw new Error('Admin login failed - no cookie received');
+    }
     
     // Create regular user directly in database
     const regularUser = new User({
@@ -74,24 +78,19 @@ beforeAll(async () => {
             password: testUser.password
         });
     
-    userToken = userLoginResponse.headers['set-cookie'][0].split(';')[0].split('=')[1];
+    if (userLoginResponse.headers['set-cookie'] && userLoginResponse.headers['set-cookie'][0]) {
+        userToken = userLoginResponse.headers['set-cookie'][0].split(';')[0].split('=')[1];
+    } else {
+        throw new Error('User login failed - no cookie received');
+    }
 });
 
 afterAll(async () => {
-    await User.deleteMany({
-        email: { $in: [testAdmin.email, testUser.email] }
-    });
-    await Sweet.deleteMany({
-        name: { $in: [testSweet.name] }
-    });
+    await User.deleteMany({});
+    await Sweet.deleteMany({});
     await mongoose.connection.close();
 });
 
-afterEach(async () => {
-    await Sweet.deleteMany({
-        name: { $in: [testSweet.name, "Another Sweet"] }
-    });
-});
 
 describe("Sweet API", () => {
     describe("POST /api/sweets", () => {
@@ -170,8 +169,14 @@ describe("Sweet API", () => {
             const response = await request(app)
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
-                .send(testSweet);
-            sweetId = response.body.sweet._id;
+                .send(testSweet)
+                .expect(201);
+            
+            if (response.body.sweet && response.body.sweet._id) {
+                sweetId = response.body.sweet._id;
+            } else {
+                throw new Error('Failed to create test sweet');
+            }
         });
 
         it("should update a sweet when admin is authenticated", async () => {
@@ -246,8 +251,14 @@ describe("Sweet API", () => {
             const response = await request(app)
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
-                .send(testSweet);
-            sweetId = response.body.sweet._id;
+                .send(testSweet)
+                .expect(201);
+            
+            if (response.body.sweet && response.body.sweet._id) {
+                sweetId = response.body.sweet._id;
+            } else {
+                throw new Error('Failed to create test sweet');
+            }
         });
 
         it("should delete a sweet when admin is authenticated", async () => {
@@ -293,6 +304,8 @@ describe("Sweet API", () => {
 
     describe("GET /api/sweets", () => {
         it("should get all sweets when user is authenticated", async () => {
+
+            await Sweet.deleteMany({});
             // Create some test sweets
             await request(app)
                 .post("/api/sweets")
@@ -331,6 +344,8 @@ describe("Sweet API", () => {
         });
 
         it("should return empty array when no sweets exist", async () => {
+
+            await Sweet.deleteMany({});
             const response = await request(app)
                 .get("/api/sweets")
                 .set('Cookie', `token=${userToken}`)
@@ -349,8 +364,14 @@ describe("Sweet API", () => {
             const response = await request(app)
                 .post("/api/sweets")
                 .set('Cookie', `token=${adminToken}`)
-                .send(testSweet);
-            sweetId = response.body.sweet._id;
+                .send(testSweet)
+                .expect(201);
+            
+            if (response.body.sweet && response.body.sweet._id) {
+                sweetId = response.body.sweet._id;
+            } else {
+                throw new Error('Failed to create test sweet');
+            }
         });
 
         it("should get a sweet by id when user is authenticated", async () => {

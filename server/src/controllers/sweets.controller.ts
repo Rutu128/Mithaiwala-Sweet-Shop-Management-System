@@ -106,7 +106,7 @@ export const purchaseSweet = async (req: Request, res: Response) => {
         const { quantity } = req.body;
 
         // Validate quantity
-        if (!quantity) {
+        if ( quantity === undefined || quantity === null || quantity === "") {
             return res.status(400).json({ message: "Quantity is required" });
         }
 

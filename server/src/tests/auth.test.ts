@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../app";
-import { connectDB } from "../db";
+import { testConnectDB as connectDB } from "../db";
 import mongoose from "mongoose";
 import User from "../models/user.model";
 
@@ -16,14 +16,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await User.deleteMany({
-        email: testUser.email
-    });
+    await User.deleteMany({});
     await mongoose.connection.close();
-});
-
-afterEach(async () => {
-    await User.deleteOne({ email: testUser.email });
 });
 
 describe("Auth API", () => {
