@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://mithaiwala-sweet-shop-management-sy.vercel.app/", "http://localhost:3000", process.env.FRONTEND_URL || ""],
+    origin: ["http://localhost:5173", "https://mithaiwala-sweet-shop-management-sy.vercel.app", "http://localhost:3000", process.env.FRONTEND_URL || ""],
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS", "UPDATE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
