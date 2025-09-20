@@ -13,12 +13,12 @@ const PhotoGallery = () => {
       title: "Traditional Mithai"
     },
     {
-      src: "https://images.unsplash.com/photo-1625814172051-bf2733ac7511?w=600&h=800&fit=crop",
+      src: "./sweet1.jpg",
       alt: "Gulab Jamun",
       title: "Sweet Delicacies"
     },
     {
-      src: "https://images.unsplash.com/photo-1599599810694-57e1319e6949?w=600&h=800&fit=crop",
+      src: "./sweet2.jpg",
       alt: "Colorful Sweets",
       title: "Festive Collection"
     }
